@@ -21,8 +21,8 @@ app.listen(SERVER_PORT, () => {
 
 app.get('/messages', (req, res, next) => {
     console.log('GET @ messages')
-    const channel = discordBot.channels.cache.get(CHANNEL_ID);
-    channel.messages.fetch({ limit: req.query.count || 3 })
+    const channel = discordBot.channels.get(CHANNEL_ID);
+    channel.fetchMessages({ limit: req.query.count || 3 })
         .then(messages => {
             res.send(messages.map(m => { 
                 return {
