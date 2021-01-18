@@ -1,30 +1,35 @@
-const express = require('express')
-const app = express()
-const discord = require('discord.js');
-const discordBot = new discord.Client();
-const routes = express.Router()
+require('dotenv').config();
+const { SERVER_PORT, DISCORD_TOKEN, CHANNEL_ID } = process.env;
 
-routes.get('/messages', (req, res, next) => {
-    console.log('GET @ messages')
-    const channel = discordBot.channels.cache.get("746560917231370281")
-    channel.messages.fetch({ limit: req.query.count || 3 }).then(messages => {
-        res.send(messages.map(m => { 
-            return {
-                created: new Date(m.createdTimestamp).toISOString(), 
-                content: m.content
-             }
-            }))
-        }
-    )
-})
+const express = require('express')
+const discord = require('discord.js');
+
+const app = express()
+const discordBot = new discord.Client();
+
+app.use(express.json());
 
 discordBot.once('ready', () => {
-    console.log('Ready!')
+    console.log('Discord bot is ready!')
 })
 
+discordBot.login(DISCORD_TOKEN);
 
-discordBot.on('message', messageAction)
-app.use(routes)
+app.listen(SERVER_PORT, () => {
+    console.log(`Magic at ${SERVER_PORT}`);
+})
 
-discordBot.login('ODAwNTQxOTIxOTA2NTI0MjAx.YAToww.WSrGkEKZK9juM5o_AL5yRX7KW8E')
-app.listen(3000)
+app.get('/messages', (req, res, next) => {
+    console.log('GET @ messages')
+    const channel = discordBot.channels.cache.get(CHANNEL_ID);
+    channel.messages.fetch({ limit: req.query.count || 3 })
+        .then(messages => {
+            res.send(messages.map(m => { 
+                return {
+                    created: new Date(m.createdTimestamp).toISOString(), 
+                    content: m.content
+                }
+            }))
+        })
+})
+ 
